@@ -1,18 +1,15 @@
-import mysql.connector
-from rich import print as printc
-from rich.console import Console
-console = Console()
+import sqlite3
+
+# Connect to the database
   
 def dbconfig():
   try:
-    db = mysql.connector.connect(
-      host ="localhost",
-      user ="pm",
-      passwd ="password"
-    )
+    # Connect to the database
+    conn = sqlite3.connect('manager.db')
+    # Create a cursor object to execute SQL queries
+    # print('Connected successfully ', conn)
     # printc("[green][+][/green] Connected to db")
   except Exception as e:
     print("[red][!] An error occurred while trying to connect to the database[/red]")
-    console.print_exception(show_locals=True)
+  return conn
 
-  return db
