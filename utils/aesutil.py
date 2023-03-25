@@ -43,7 +43,6 @@ def decrypt(key, source, decode=True, keyType="hex"):
 	keyType - specify the type of key passed
 
 	Returns:
-	The decrypted data
 	'''
 
     source = source.encode()
