@@ -1,13 +1,10 @@
 import hashlib
 import os
-
 import pyperclip
-
 from aesutil import encrypt, decrypt
 import sqlite3
 import string
 from random import choices
-
 from Crypto.Hash import SHA512
 from Crypto.Protocol.KDF import PBKDF2
 
@@ -126,14 +123,20 @@ def computeMasterKey():
     return key
 
 
-def checkEntry(sitename=None, siteurl=None, email=None, username=None):
+def checkEntry(sitename=None, siteurl=None):
+    query = ""
+    # print(sitename, siteurl)
+    if sitename != '':
+        query = f"SELECT * FROM {userEntry_tb} WHERE sitename = '{sitename}'"
+    elif siteurl != '':
+        query = f"SELECT * FROM {userEntry_tb} WHERE siteurl = '{siteurl}'"
     db = dbconfig()
     cursor = db.cursor()
-    query = f"SELECT * FROM {userEntry_tb} WHERE sitename = '{sitename}' OR siteurl = '{siteurl}' OR email = '{email}' OR username = '{username}'"
+    # query = f"SELECT * FROM {userEntry_tb} WHERE sitename = '{sitename}' OR siteurl = '{siteurl}' OR email = '{email}' OR username = '{username}'"
     cursor.execute(query)
-    results = cursor.fetchall()
+    results = cursor.fetchone()
 
-    if len(results) != 0:
+    if results is not None and len(results) != 0 :
         return True
     return False
 
@@ -142,7 +145,7 @@ def addEntry(sitename, siteurl, email, username, password):
     mk = computeMasterKey()
     encrypted = encrypt(key=mk, source=password, keyType="bytes")
     # Check if the entry already exists
-    if checkEntry(sitename, siteurl, email, username):
+    if checkEntry(sitename, siteurl):
         try:
             conn = dbconfig()
             c = conn.cursor()
@@ -170,27 +173,42 @@ def addEntry(sitename, siteurl, email, username, password):
     return 1
 
 
-def retrieveEntries(sitename=None, siteurl=None):
+def retrieveEntries(sitename, siteurl):
+    query = ""
+    # print(sitename, siteurl)
+    if sitename != '':
+        query = f"SELECT * FROM {userEntry_tb} WHERE sitename = '{sitename}'"
+    elif siteurl != '':
+        query = f"SELECT * FROM {userEntry_tb} WHERE siteurl = '{siteurl}'"
     try:
         conn = dbconfig()
         c = conn.cursor()
-        query = f"SELECT * FROM {userEntry_tb} WHERE sitename = '{sitename}' OR siteurl = '{siteurl}'"
         c.execute(query)
         results = c.fetchone()
+        print(results)
         mk = computeMasterKey()
-        decrypted = decrypt(key=mk, source=results[4], keyType="bytes")
-        pyperclip.copy(decrypted.decode())
+        # print(results[4])
+        if results is not None:
+            decrypted = decrypt(key=mk, source=results[4], keyType="bytes")
+            pyperclip.copy(decrypted.decode())
+            if pyperclip.paste() == decrypted.decode():
+                return True
+            else:
+                return False
     except Exception as e:
         print(e)
     finally:
         c.close()
         conn.close()
+    return False
 
 
 if __name__ == "__main__":
+    pass
     # remake()
     # print(registerDevice('1234567890'))
     # print(validateMasterPassword('1234567890'))
-    print(addEntry('facebook', 'fb.com', 'abc@gmail.com', 'abc', '12345'))
+    # print(addEntry('facebook', 'fb.com', 'abc@gmail.com', 'abc', '12345'))
 
-    print(computeMasterKey())
+    # print(computeMasterKey())
+    print(retrieveEntries(sitename='facebook',siteurl=''))

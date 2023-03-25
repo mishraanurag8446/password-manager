@@ -66,14 +66,17 @@ def setMenuOption(root):
 
 def menuAddEntry():
     loadAddEntry(root, haderFrame, mainFrame)
+    setStatus(status, 'Ready', statusColor.get('s'))
 
 
 def menuSearchEntry():
     loadSearchEntry(haderFrame, mainFrame)
+    setStatus(status, 'Ready', statusColor.get('s'))
 
 
 def menuGeneratePassword():
     loadGeneratePassword(root, haderFrame, mainFrame)
+    setStatus(status, 'Ready', statusColor.get('s'))
 
 
 def loadAddEntry(root, hframe, mframe):
@@ -162,7 +165,18 @@ def loadSearchEntry(hframe, mframe):
 
 
 def searchEntry():
-    retrieveEntries(sitename=siteNameValue.get(), siteurl=siteUrlValue.get())
+    state = False
+    # retrieveEntries(sitename='facebook', siteurl='')
+    # print(siteNameValue.get(), siteUrlValue.get(), siteNameValue.get() != '')
+    if siteNameValue.get() != '' or siteUrlValue.get() != '':
+        state = retrieveEntries(sitename=siteNameValue.get(), siteurl=siteUrlValue.get())
+    if state:
+        setStatus(status, 'Password got copied to clip board', statusColor.get('s'))
+    else:
+        setStatus(status, 'Not found record', statusColor.get('w'))
+    print(state)
+    siteNameValue.set('')
+    siteUrlValue.set('')
 
 
 def loadGeneratePassword(root, hframe, mframe):
